@@ -16,8 +16,10 @@ docker info >/dev/null 2>&1  || die "Docker isn't running. Open Docker Desktop, 
 command -v node >/dev/null   || die "Node.js isn't installed. Get it from nodejs.org (v18+)."
 
 # --- 1. Postgres + Redis ----------------------------------------------------
+# Only the db + redis services — the backend/worker/frontend run on the host
+# below (for hot reload). Starting the full stack here would collide on ports.
 info "Starting Postgres + Redis (Docker)…"
-docker compose up -d
+docker compose up -d db redis
 
 info "Waiting for the database to accept connections…"
 until docker exec sakse-db pg_isready -U sakse >/dev/null 2>&1; do sleep 1; done
