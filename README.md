@@ -1,71 +1,140 @@
 # Sakse — Washing Machine Reservation App
 
-A web app to find partner laundromats on a map, reserve an empty washing machine,
-pay from an in-app wallet (topped up via PromptPay), and get notified when the wash
-is nearly done. If all machines are busy, users join a **waitlist**.
+A mobile-first web app to find partner laundromats on a map, reserve a washing
+machine, pay from an in-app wallet, scan a QR to start/collect your wash, and get
+notified when it's nearly done. If every machine is busy, users join a **waitlist**.
+
+## Features
+
+- 🗺️ **Map** of nearby laundromats, sorted by distance from your location, with in-app turn-by-turn **navigation** (no Google Maps API)
+- 💳 **Wallet** with PromptPay top-up (confirm-to-pay) — money tracked as a ledger in satang
+- 🧺 **Reserve → confirm & pay → scan QR to start → timer → scan QR to collect**
+- 🔴 **Cancel & refund** before you start, or **auto-cancel + refund** if you don't show up within 10 minutes
+- ⏰ Background **timers**: "almost done" notice, auto-complete, and a late-pickup fine
+- 🧍 **Waitlist** when all machines are busy — the next person is notified when one frees up
 
 ## Stack
 
 - **Frontend:** React + Vite + Tailwind + react-leaflet (map) — mobile-first
-- **Backend:** Node.js + Express
-- **Database:** PostgreSQL + PostGIS, via Prisma ORM
+- **Backend:** Node.js + Express + Prisma ORM
+- **Database:** PostgreSQL + PostGIS
+- **Cache/jobs:** Redis + BullMQ (wash timers, notifications, fines)
 - **Auth:** JWT
-- **Background jobs:** BullMQ + Redis (5-min "almost done" notify + late-fine check)
-- **Payments:** PromptPay at wallet top-up (test mode)
 
-## Prerequisites
+---
 
-- Node.js 20+ and npm
-- Docker Desktop (for Postgres + Redis) — **start it before running the commands below**
+## Quick start (one command)
 
-## First-time setup
+Requires **Node.js 20+** and **Docker Desktop** (started).
 
 ```bash
-# 1. Start the database + Redis (run from the project root)
-docker compose up -d
-
-# 2. Backend API
-cd backend
-cp .env.example .env          # defaults already match docker-compose
-npm install
-npm run prisma:migrate        # creates the database tables
-npm run db:seed               # adds demo laundromats + machines
-npm run dev                   # backend on http://localhost:4000
-
-# 3. Background worker (in its own terminal, from backend/)
-npm run worker                # runs the wash timers, notifications, late fines
-
-# 4. Frontend (in a second/third terminal)
-cd frontend
-npm install
-npm run dev                   # frontend on http://localhost:5173
+git clone git@github.com:cearet/sakse.git
+cd sakse
+./run.sh
 ```
 
-### Demo mode (watch the timers quickly)
+`run.sh` does everything: starts Postgres + Redis in Docker, installs
+dependencies, applies database migrations, seeds demo data (only if the database
+is empty), then launches the backend, worker, and frontend together with labeled
+logs. When it's ready, open **http://localhost:5173**. Press **Ctrl+C** to stop
+(Docker keeps running — stop it with `docker compose down`).
 
-The `.env` ships with `TIME_UNIT_MS=1000`, so a "20-minute" wash finishes in
-20 seconds — you can watch the whole notify → done → late-fine flow in under a
+---
+
+## Running without Docker
+
+You don't need Docker — you just need Postgres (with PostGIS) and Redis from
+*somewhere*. Point `backend/.env` at them and skip `./run.sh`, running the
+[manual steps](#manual-setup) below.
+
+**Option A — free cloud, nothing to install:**
+
+1. **Database:** create a free Postgres at [neon.tech](https://neon.tech) or
+   [supabase.com](https://supabase.com) (both support PostGIS) → put its
+   connection string in `DATABASE_URL`.
+2. **Redis:** create a free Redis at [upstash.com](https://upstash.com) → put its
+   URL in `REDIS_URL`.
+
+**Option B — install locally (macOS):**
+
+```bash
+brew install postgresql postgis redis
+brew services start postgresql && brew services start redis
+createdb sakse && psql sakse -c "CREATE EXTENSION postgis;"
+# leave DATABASE_URL / REDIS_URL at their localhost defaults
+```
+
+---
+
+## Manual setup
+
+If you'd rather run the steps yourself (with Docker or one of the options above):
+
+```bash
+# 1. (Docker users) start the database + Redis
+docker compose up -d
+
+# 2. Backend API + worker
+cd backend
+cp .env.example .env            # defaults match docker-compose
+npm install
+npx prisma migrate deploy       # create the tables
+node prisma/seed.js             # add demo laundromats + machines
+npm run dev                     # terminal 1 — API on :4000
+npm run worker                  # terminal 2 — timers/notifications/fines
+
+# 3. Frontend
+cd ../frontend
+cp .env.example .env
+npm install
+npm run dev                     # terminal 3 — app on :5173
+```
+
+Health check: open http://localhost:4000/api/health → `{"ok":true,"db":"connected"}`.
+
+---
+
+## Demo mode & timing
+
+`backend/.env` ships with `TIME_UNIT_MS=1000`, so a "20-minute" wash finishes in
+**20 seconds** — you can watch the whole notify → done → late-fine flow in under a
 minute. Set `TIME_UNIT_MS=60000` for real minutes.
 
-Check it works: open http://localhost:4000/api/health — you should see
-`{"ok":true,"db":"connected"}`.
+The no-show auto-cancel uses **real** minutes (`RESERVE_EXPIRE_MINUTES=10`), not
+the sped-up clock. Lower it (e.g. `1`) to demo the auto-cancel quickly.
+
+## Testing the QR flow
+
+Machine QR codes are stable slugs, so they don't change between reseeds. Reserve a
+machine, tap **Scan QR to start**, and either point the camera at that machine's
+QR (open `▦ Machine QR` on the laundromat page / `/machine/<id>/qr`) or paste the
+code into the fallback box:
+
+- CleanWash Siam → `SAKSE-MACHINE:clean-1` … `clean-4`
+- BubbleLaundry Asok → `SAKSE-MACHINE:bubble-1` … `bubble-3`
+- SpinCity Ari → `SAKSE-MACHINE:spin-1` … `spin-5`
+
+The code must match the machine you reserved.
 
 ## Everyday commands
 
 ```bash
-docker compose up -d      # start db + redis
-docker compose down       # stop them (data is kept)
-npm run dev               # (in backend/ or frontend/) start dev server
-npm run prisma:studio     # (in backend/) visual database browser
+./run.sh                    # start everything
+docker compose up -d        # just the db + redis
+docker compose down         # stop them (data is kept)
+npm --prefix backend run prisma:studio   # visual database browser at :5555
 ```
 
 ## Project structure
 
 ```
 sakse/
-├── docker-compose.yml     # Postgres + PostGIS + Redis
-├── backend/               # Express API
-│   ├── prisma/schema.prisma   # the data model
-│   └── src/index.js           # server entry
-└── frontend/              # React + Vite app
+├── run.sh                      # one-command dev startup
+├── docker-compose.yml          # Postgres + PostGIS + Redis
+├── backend/                    # Express API
+│   ├── prisma/schema.prisma    # the data model
+│   ├── prisma/seed.js          # demo data
+│   └── src/                     # routes, worker, lib
+└── frontend/                   # React + Vite app
+    └── src/pages/               # Home (map), Wallet, Reservation, etc.
 ```
