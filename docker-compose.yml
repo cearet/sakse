@@ -80,10 +80,10 @@ services:
     command: ["src/worker.js"]
 
   frontend:
+    # No VITE_API_URL build arg → the app derives the backend address from the
+    # host it's opened on (localhost on your Mac, the LAN IP from a phone).
     build:
       context: ./frontend
-      args:
-        VITE_API_URL: "http://localhost:4000"
     container_name: sakse-frontend
     restart: unless-stopped
     depends_on:

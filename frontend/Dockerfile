@@ -4,9 +4,10 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 COPY . .
-# Baked into the bundle at build time. The browser runs on the host, so it
-# reaches the backend at localhost:4000 (the port compose publishes).
-ARG VITE_API_URL=http://localhost:4000
+# Optional override. Left empty by default so the app derives the backend
+# address from the host it's opened on (works on localhost and on a phone via
+# the Mac's LAN IP). Set this only to pin a fixed backend URL in production.
+ARG VITE_API_URL=""
 ENV VITE_API_URL=$VITE_API_URL
 RUN npm run build
 
