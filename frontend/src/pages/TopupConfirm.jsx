@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { api } from "../api";
 import { useAuth } from "../auth";
@@ -13,9 +13,8 @@ export default function TopupConfirm() {
   const [done, setDone] = useState(false);
 
   const amount = Number(params.get("amount")) || 0;
-  // A stable mock PromptPay reference for this attempt (real flow = EMVCo QR).
-  const ref = useMemo(() => "SKS" + Math.random().toString(36).slice(2, 8).toUpperCase(), []);
-  const payload = `PROMPTPAY|SAKSE|amt=${(amount / 100).toFixed(2)}|ref=${ref}`;
+  // Demo placeholder — a real integration would render an EMVCo PromptPay QR here.
+  const payload = "https://google.com";
 
   if (amount <= 0) {
     return (
@@ -72,7 +71,7 @@ export default function TopupConfirm() {
             </div>
 
             <p className="text-sm font-semibold text-slate-700">Scan with your banking app</p>
-            <p className="mt-1 text-xs text-slate-400">🇹🇭 PromptPay · Ref {ref}</p>
+            <p className="mt-1 text-xs text-slate-400">Demo placeholder · https://google.com</p>
             <p className="mt-4 rounded-xl bg-amber-50 px-3 py-2 text-xs text-amber-700">
               Demo: this QR is simulated. Tap below to confirm the payment.
             </p>
