@@ -1,0 +1,26 @@
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    container_name: sakse-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: sakse
+      POSTGRES_PASSWORD: sakse
+      POSTGRES_DB: sakse
+    ports:
+      - "5432:5432"
+    volumes:
+      - sakse-db-data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7
+    container_name: sakse-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - sakse-redis-data:/data
+
+volumes:
+  sakse-db-data:
+  sakse-redis-data:

@@ -1,0 +1,165 @@
+// Sakse — washing machine reservation + waitlist app
+// Data model. Money is stored as INTEGER satang (฿10.50 = 1050) — never floats.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------- Users & money ----------
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  phone        String?  @unique
+  name         String
+  passwordHash String
+  createdAt    DateTime @default(now())
+
+  wallet        Wallet?
+  reservations  Reservation[]
+  waitlist      WaitlistEntry[]
+  notifications Notification[]
+}
+
+model Wallet {
+  id           String        @id @default(cuid())
+  userId       String        @unique
+  user         User          @relation(fields: [userId], references: [id])
+  balance      Int           @default(0) // satang; derived from ledger, cached here
+  transactions Transaction[]
+}
+
+enum TxnType {
+  TOPUP      // external: PromptPay top-up (has gatewayRef)
+  PAYMENT    // internal: paying to reserve a machine
+  FINE       // internal: late pickup penalty
+  REFUND     // internal: refund (e.g. cancelled reservation)
+}
+
+model Transaction {
+  id         String   @id @default(cuid())
+  walletId   String
+  wallet     Wallet   @relation(fields: [walletId], references: [id])
+  type       TxnType
+  amount     Int // satang; positive = credit, negative = debit
+  gatewayRef String? // only set for external TOPUP
+  note       String?
+  createdAt  DateTime @default(now())
+
+  @@index([walletId])
+}
+
+// ---------- Places & machines ----------
+
+model Laundromat {
+  id        String   @id @default(cuid())
+  name      String
+  address   String?
+  lat       Float
+  lng       Float
+  createdAt DateTime @default(now())
+
+  machines  Machine[]
+  waitlist  WaitlistEntry[]
+}
+
+enum MachineStatus {
+  AVAILABLE
+  RESERVED // paid, awaiting user arrival
+  RUNNING
+  DONE // cycle finished, awaiting pickup
+  OVERDUE // pickup late (>10 min) — fine applies
+  OUT_OF_ORDER
+}
+
+model Machine {
+  id           String        @id @default(cuid())
+  laundromatId String
+  laundromat   Laundromat    @relation(fields: [laundromatId], references: [id])
+  label        String // e.g. "Machine 1"
+  status       MachineStatus @default(AVAILABLE)
+  pricePerCycle Int          @default(3000) // satang (฿30)
+  cycleMinutes Int           @default(40)
+
+  reservations Reservation[]
+
+  @@index([laundromatId])
+}
+
+// ---------- Reservations & waitlist ----------
+
+enum ReservationStatus {
+  ACTIVE // holds the machine (reserved/running/done stages)
+  COMPLETED // collected on time
+  CANCELLED // expired hold or user cancelled
+  FINED // collected late, fine charged
+}
+
+model Reservation {
+  id          String            @id @default(cuid())
+  userId      String
+  user        User              @relation(fields: [userId], references: [id])
+  machineId   String
+  machine     Machine           @relation(fields: [machineId], references: [id])
+  status      ReservationStatus @default(ACTIVE)
+  paidAmount  Int // satang
+  fineAmount  Int               @default(0) // satang; charged if picked up late
+  reservedAt  DateTime          @default(now())
+  startedAt   DateTime? // when the wash cycle started
+  doneAt      DateTime? // when the cycle finished
+  collectedAt DateTime? // when user picked up
+
+  @@index([userId])
+  @@index([machineId])
+}
+
+enum WaitlistStatus {
+  WAITING
+  NOTIFIED // a machine freed up; user has a short window to claim it
+  CLAIMED
+  EXPIRED
+}
+
+model WaitlistEntry {
+  id           String         @id @default(cuid())
+  userId       String
+  user         User           @relation(fields: [userId], references: [id])
+  laundromatId String
+  laundromat   Laundromat     @relation(fields: [laundromatId], references: [id])
+  status       WaitlistStatus @default(WAITING)
+  position     Int
+  createdAt    DateTime       @default(now())
+
+  @@index([laundromatId, status])
+}
+
+// ---------- Notifications ----------
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  title     String
+  body      String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId, read])
+}
+
+// ---------- Ops ----------
+
+model Log {
+  id        String   @id @default(cuid())
+  level     String   @default("info") // info | warn | error
+  message   String
+  meta      Json?
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}
