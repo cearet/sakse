@@ -1,13 +1,11 @@
 // Tiny wrapper around fetch that talks to our backend and attaches the
 // logged-in user's token automatically.
 
-// Where the backend lives. If VITE_API_URL is set at build time it wins;
-// otherwise we derive it from whatever host the app was opened on, so it works
-// on localhost AND when a phone hits the Mac's LAN IP (e.g. 192.168.1.39:5173
-// → backend at 192.168.1.39:4000) with no rebuild.
-const BASE =
-  import.meta.env.VITE_API_URL ||
-  `${window.location.protocol}//${window.location.hostname}:4000`;
+// Backend base URL. Default is same-origin ("") — the frontend's nginx proxies
+// /api/* to the backend, so API calls work over localhost, the LAN IP, and an
+// HTTPS tunnel alike with no cross-origin and no rebuild. Set VITE_API_URL only
+// to point at a separate backend host.
+const BASE = import.meta.env.VITE_API_URL || "";
 
 export function getToken() {
   return localStorage.getItem("token");
