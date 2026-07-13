@@ -1,0 +1,13 @@
+{
+  "name": "sakse",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Sakse — washing-machine reservation app (run everything with ./run.sh)",
+  "scripts": {
+    "dev": "concurrently --kill-others --names api,worker,web --prefix-colors blue,magenta,green \"npm --prefix backend run dev\" \"npm --prefix backend run worker\" \"npm --prefix frontend run dev\"",
+    "start": "./run.sh"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  }
+}
