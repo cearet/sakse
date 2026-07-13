@@ -1,3 +1,21 @@
+# Runs the ENTIRE app in Docker: database, cache, backend API, worker, frontend.
+# Start everything with:  docker compose up --build
+
+# Shared environment for the backend + worker (they use the same image).
+# Inside the compose network, services reach each other by name (db, redis).
+x-backend-env: &backend-env
+  DATABASE_URL: "postgresql://sakse:sakse@db:5432/sakse?schema=public"
+  REDIS_URL: "redis://redis:6379"
+  JWT_SECRET: "dev-secret-change-me-to-a-long-random-string"
+  JWT_EXPIRES_IN: "7d"
+  PORT: "4000"
+  # Demo timing: a "20-minute" wash finishes in 20s. Set 60000 for real minutes.
+  TIME_UNIT_MS: "1000"
+  NOTIFY_BEFORE_MINUTES: "5"
+  GRACE_MINUTES: "10"
+  FINE_AMOUNT: "2000"
+  RESERVE_EXPIRE_MINUTES: "10"
+
 services:
   db:
     image: postgis/postgis:16-3.4
@@ -11,6 +29,11 @@ services:
       - "5432:5432"
     volumes:
       - sakse-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sakse"]
+      interval: 5s
+      timeout: 3s
+      retries: 15
 
   redis:
     image: redis:7
@@ -20,6 +43,53 @@ services:
       - "6379:6379"
     volumes:
       - sakse-redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 15
+
+  backend:
+    build: ./backend
+    image: sakse-backend
+    container_name: sakse-backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment: *backend-env
+    ports:
+      - "4000:4000"
+
+  worker:
+    # Reuses the backend image; just runs the worker process instead of the API.
+    image: sakse-backend
+    container_name: sakse-worker
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_started
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment: *backend-env
+    entrypoint: ["node"]
+    command: ["src/worker.js"]
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_URL: "http://localhost:4000"
+    container_name: sakse-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "5173:80"
 
 volumes:
   sakse-db-data:

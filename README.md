@@ -23,21 +23,50 @@ notified when it's nearly done. If every machine is busy, users join a **waitlis
 
 ---
 
-## Quick start (one command)
+## Run it — everything in Docker (recommended)
 
-Requires **Node.js 20+** and **Docker Desktop** (started).
+The **only** thing you need installed is **Docker Desktop** (started). No Node, no
+Postgres, no Redis — Docker runs all five pieces (db, redis, backend, worker,
+frontend).
 
 ```bash
 git clone git@github.com:cearet/sakse.git
 cd sakse
+docker compose up --build
+```
+
+That builds the images and starts the whole stack. The backend automatically
+applies database migrations and seeds demo data on first run. When it's up, open:
+
+- **App:** http://localhost:5173
+- **API health:** http://localhost:4000/api/health → `{"ok":true,"db":"connected"}`
+
+Everyday commands:
+
+```bash
+docker compose up --build     # start everything (rebuild after code changes)
+docker compose up -d          # start in the background
+docker compose logs -f        # follow logs
+docker compose down           # stop everything (data is kept in volumes)
+docker compose down -v        # stop and wipe the database too
+```
+
+> Because these are built images, re-run with `--build` after changing code so the
+> new code is baked in.
+
+## Local development (hot reload, optional)
+
+If you're actively editing code and want live reload instead of rebuilding images,
+run the database + Redis in Docker and the Node apps on your host. Requires
+**Node.js 20+**:
+
+```bash
 ./run.sh
 ```
 
-`run.sh` does everything: starts Postgres + Redis in Docker, installs
-dependencies, applies database migrations, seeds demo data (only if the database
-is empty), then launches the backend, worker, and frontend together with labeled
-logs. When it's ready, open **http://localhost:5173**. Press **Ctrl+C** to stop
-(Docker keeps running — stop it with `docker compose down`).
+`run.sh` starts Postgres + Redis in Docker, installs dependencies, migrates, seeds
+(only if empty), then launches backend + worker + frontend together with labeled
+logs. Open **http://localhost:5173**; press **Ctrl+C** to stop.
 
 ---
 
