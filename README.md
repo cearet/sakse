@@ -23,11 +23,20 @@ notified when it's nearly done. If every machine is busy, users join a **waitlis
 
 ---
 
-## Run it — everything in Docker (recommended)
+# Setup
 
-The **only** thing you need installed is **Docker Desktop** (started). No Node, no
-Postgres, no Redis — Docker runs all five pieces (db, redis, backend, worker,
-frontend).
+Pick one of the three methods below. **Docker method** is the easiest and what we
+recommend.
+
+Once it's running, open the app at **http://localhost:5173**.
+
+---
+
+## 1. Docker method (recommended)
+
+**You only need [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+installed and open.** No Node, Postgres, or Redis — Docker runs everything (db,
+redis, backend, worker, frontend).
 
 ```bash
 git clone git@github.com:cearet/sakse.git
@@ -35,54 +44,74 @@ cd sakse
 docker compose up --build
 ```
 
-That builds the images and starts the whole stack. The backend automatically
-applies database migrations and seeds demo data on first run. When it's up, open:
+That's it. The backend applies database migrations and loads demo data
+automatically on first run. When the logs settle, open **http://localhost:5173**.
 
-- **App:** http://localhost:5173
-- **API health:** http://localhost:4000/api/health → `{"ok":true,"db":"connected"}`
-
-Everyday commands:
+**Common commands:**
 
 ```bash
-docker compose up --build     # start everything (rebuild after code changes)
+docker compose up --build     # start everything (use --build after code changes)
 docker compose up -d          # start in the background
-docker compose logs -f        # follow logs
-docker compose down           # stop everything (data is kept in volumes)
-docker compose down -v        # stop and wipe the database too
+docker compose logs -f        # watch the logs
+docker compose down           # stop everything (your data is kept)
+docker compose down -v        # stop AND wipe the database
 ```
 
-> Because these are built images, re-run with `--build` after changing code so the
-> new code is baked in.
+> ℹ️ These are built images, so re-run with `--build` whenever you change code.
 
-## Local development (hot reload, optional)
+---
 
-If you're actively editing code and want live reload instead of rebuilding images,
-run the database + Redis in Docker and the Node apps on your host. Requires
-**Node.js 20+**:
+## 2. Dev method (hot reload)
+
+For coding with live reload instead of rebuilding Docker images each time. Runs the
+database + Redis in Docker and the app on your machine.
+
+**Needs:** [Node.js 20+](https://nodejs.org) and Docker Desktop.
 
 ```bash
 ./run.sh
 ```
 
-`run.sh` starts Postgres + Redis in Docker, installs dependencies, migrates, seeds
-(only if empty), then launches backend + worker + frontend together with labeled
-logs. Open **http://localhost:5173**; press **Ctrl+C** to stop.
+`run.sh` starts Postgres + Redis, installs dependencies, sets up the database, and
+launches the backend, worker, and frontend together. Open
+**http://localhost:5173**; press **Ctrl+C** to stop.
+
+<details>
+<summary>Prefer to run the steps by hand?</summary>
+
+```bash
+docker compose up -d db redis   # just the database + redis
+
+# Backend (2 terminals)
+cd backend
+cp .env.example .env
+npm install
+npx prisma migrate deploy       # create the tables
+node prisma/seed.js             # load demo data
+npm run dev                     # terminal 1 — API on :4000
+npm run worker                  # terminal 2 — timers, notifications, fines
+
+# Frontend (3rd terminal)
+cd ../frontend
+cp .env.example .env
+npm install
+npm run dev                     # app on :5173
+```
+</details>
 
 ---
 
-## Running without Docker
+## 3. No-Docker method
 
-You don't need Docker — you just need Postgres (with PostGIS) and Redis from
-*somewhere*. Point `backend/.env` at them and skip `./run.sh`, running the
-[manual steps](#manual-setup) below.
+If you can't use Docker at all, you just need Postgres (with PostGIS) and Redis
+from somewhere, then run the **Dev method** steps above with `backend/.env`
+pointing at them.
 
-**Option A — free cloud, nothing to install:**
+**Option A — free cloud (nothing to install):**
 
-1. **Database:** create a free Postgres at [neon.tech](https://neon.tech) or
-   [supabase.com](https://supabase.com) (both support PostGIS) → put its
-   connection string in `DATABASE_URL`.
-2. **Redis:** create a free Redis at [upstash.com](https://upstash.com) → put its
-   URL in `REDIS_URL`.
+1. **Database** → [neon.tech](https://neon.tech) or [supabase.com](https://supabase.com)
+   (both include PostGIS) → paste the connection string into `DATABASE_URL`.
+2. **Redis** → [upstash.com](https://upstash.com) → paste the URL into `REDIS_URL`.
 
 **Option B — install locally (macOS):**
 
@@ -90,38 +119,12 @@ You don't need Docker — you just need Postgres (with PostGIS) and Redis from
 brew install postgresql postgis redis
 brew services start postgresql && brew services start redis
 createdb sakse && psql sakse -c "CREATE EXTENSION postgis;"
-# leave DATABASE_URL / REDIS_URL at their localhost defaults
+# leave DATABASE_URL / REDIS_URL at their defaults
 ```
 
 ---
 
-## Manual setup
-
-If you'd rather run the steps yourself (with Docker or one of the options above):
-
-```bash
-# 1. (Docker users) start the database + Redis
-docker compose up -d
-
-# 2. Backend API + worker
-cd backend
-cp .env.example .env            # defaults match docker-compose
-npm install
-npx prisma migrate deploy       # create the tables
-node prisma/seed.js             # add demo laundromats + machines
-npm run dev                     # terminal 1 — API on :4000
-npm run worker                  # terminal 2 — timers/notifications/fines
-
-# 3. Frontend
-cd ../frontend
-cp .env.example .env
-npm install
-npm run dev                     # terminal 3 — app on :5173
-```
-
-Health check: open http://localhost:4000/api/health → `{"ok":true,"db":"connected"}`.
-
----
+# Extras
 
 ## Demo mode & timing
 
@@ -145,25 +148,27 @@ code into the fallback box:
 
 The code must match the machine you reserved.
 
-## Everyday commands
+## Browsing the database
 
 ```bash
-./run.sh                    # start everything
-docker compose up -d        # just the db + redis
-docker compose down         # stop them (data is kept)
-npm --prefix backend run prisma:studio   # visual database browser at :5555
+npm --prefix backend run prisma:studio   # visual database browser at localhost:5555
 ```
+
+Or connect any Postgres GUI to `localhost:5432` (user `sakse`, password `sakse`,
+database `sakse`).
 
 ## Project structure
 
 ```
 sakse/
-├── run.sh                      # one-command dev startup
-├── docker-compose.yml          # Postgres + PostGIS + Redis
-├── backend/                    # Express API
+├── docker-compose.yml          # the whole stack: db, redis, backend, worker, frontend
+├── run.sh                      # dev-method one-command startup
+├── backend/                    # Express API + worker
+│   ├── Dockerfile
 │   ├── prisma/schema.prisma    # the data model
 │   ├── prisma/seed.js          # demo data
-│   └── src/                     # routes, worker, lib
+│   └── src/                    # routes, worker, lib
 └── frontend/                   # React + Vite app
-    └── src/pages/               # Home (map), Wallet, Reservation, etc.
+    ├── Dockerfile              # build → served by nginx
+    └── src/pages/              # Home (map), Wallet, Reservation, etc.
 ```
