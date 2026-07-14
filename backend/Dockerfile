@@ -17,7 +17,9 @@ RUN npx prisma generate
 
 # Copy the rest of the source.
 COPY . .
-RUN chmod +x docker-entrypoint.sh
+# Normalize line endings (in case the script was checked out on Windows with
+# CRLF) and make it executable — a CR in the shebang breaks `exec`.
+RUN sed -i 's/\r$//' docker-entrypoint.sh && chmod +x docker-entrypoint.sh
 
 EXPOSE 4000
 

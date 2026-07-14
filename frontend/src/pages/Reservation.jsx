@@ -107,6 +107,13 @@ export default function Reservation() {
   const total = doneMs - startMs;
   const progress = total > 0 ? Math.min(Math.max((now - startMs) / total, 0), 1) : 0;
   const finished = (status === "RUNNING" && remaining <= 0) || status === "DONE" || status === "OVERDUE";
+  const overdue = status === "OVERDUE";
+
+  // Grace window: once the wash is done, count down to when it's considered late.
+  const overdueMs = reservation?.overdueAt ? new Date(reservation.overdueAt).getTime() : 0;
+  const graceLeft = overdueMs - now;
+  const graceTotal = overdueMs - doneMs;
+  const graceProgress = graceTotal > 0 ? Math.min(Math.max(graceLeft / graceTotal, 0), 1) : 1;
 
   return (
     <div className="flex h-full flex-col bg-slate-50">
@@ -168,15 +175,20 @@ export default function Reservation() {
             {(status === "RUNNING" || status === "DONE" || status === "OVERDUE") && (
               <div className="mt-6">
                 <Ring
-                  progress={finished ? 1 : progress}
-                  color={status === "OVERDUE" ? "#e11d48" : finished ? "#7c3aed" : "#4f46e5"}
+                  progress={overdue ? 1 : finished ? graceProgress : progress}
+                  color={overdue ? "#e11d48" : finished ? "#f59e0b" : "#4f46e5"}
                 >
-                  {finished ? (
+                  {overdue ? (
                     <>
-                      <span className="text-5xl">{status === "OVERDUE" ? "⏰" : "✅"}</span>
-                      <span className="mt-1 font-bold text-slate-700">
-                        {status === "OVERDUE" ? "Overdue!" : "Done!"}
-                      </span>
+                      <span className="text-5xl">⏰</span>
+                      <span className="mt-1 font-bold text-slate-700">Overdue!</span>
+                    </>
+                  ) : finished ? (
+                    <>
+                      <span className="text-3xl">✅</span>
+                      <span className="mt-0.5 text-xs font-semibold text-slate-400">collect within</span>
+                      <span className="text-4xl font-extrabold tabular-nums text-amber-600">{fmt(graceLeft)}</span>
+                      <span className="text-xs text-slate-400">or a late fee applies</span>
                     </>
                   ) : (
                     <>

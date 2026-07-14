@@ -2,7 +2,7 @@ import { Router } from "express";
 import { prisma } from "../prisma.js";
 import { requireAuth } from "../middleware/auth.js";
 import { scheduleCycleJobs, scheduleReservationExpiry, cancelReservationExpiry } from "../lib/schedule.js";
-import { minutesToMs, RESERVE_EXPIRE_MS } from "../lib/config.js";
+import { minutesToMs, RESERVE_EXPIRE_MS, GRACE_MIN } from "../lib/config.js";
 import { promoteNextInWaitlist } from "../lib/waitlist.js";
 import { cancelAndRefund } from "../lib/reservation.js";
 
@@ -34,7 +34,14 @@ router.get("/mine", requireAuth, async (req, res) => {
     reservation.machine.status === "RESERVED"
       ? new Date(new Date(reservation.reservedAt).getTime() + RESERVE_EXPIRE_MS)
       : null;
-  res.json({ ...reservation, expiresAt });
+
+  // When the wash is done, this is the moment the pickup becomes "late" and a
+  // fine applies (doneAt + grace). Lets the client show a live grace countdown
+  // that matches the worker's overdue job.
+  const overdueAt = reservation.doneAt
+    ? new Date(new Date(reservation.doneAt).getTime() + minutesToMs(GRACE_MIN))
+    : null;
+  res.json({ ...reservation, expiresAt, overdueAt });
 });
 
 // POST /api/reservations  { machineId }
