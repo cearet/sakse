@@ -1,5 +1,6 @@
 import { prisma } from "../prisma.js";
 import { promoteNextInWaitlist } from "./waitlist.js";
+import { logInfo } from "./log.js";
 
 // Cancel a not-yet-started reservation: refund the fare, free the machine, and
 // notify the next person waiting. Returns the reservation if it was cancelled,
@@ -39,5 +40,11 @@ export async function cancelAndRefund(reservationId, note) {
   ]);
 
   await promoteNextInWaitlist(reservation.machine.laundromatId);
+  logInfo("reservation.refunded", {
+    reservationId: reservation.id,
+    userId: reservation.userId,
+    amount: reservation.paidAmount,
+    reason: note || "cancelled",
+  });
   return reservation;
 }

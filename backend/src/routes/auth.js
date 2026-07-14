@@ -2,6 +2,7 @@ import { Router } from "express";
 import bcrypt from "bcryptjs";
 import { prisma } from "../prisma.js";
 import { signToken } from "../middleware/auth.js";
+import { logInfo } from "../lib/log.js";
 
 const router = Router();
 
@@ -39,6 +40,7 @@ router.post("/register", async (req, res) => {
     include: { wallet: true },
   });
 
+  logInfo("user.registered", { userId: user.id, email: user.email });
   const token = signToken(user.id);
   res.json({ token, user: publicUser(user) });
 });

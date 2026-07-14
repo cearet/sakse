@@ -5,6 +5,7 @@ import { scheduleCycleJobs, scheduleReservationExpiry, cancelReservationExpiry }
 import { minutesToMs, RESERVE_EXPIRE_MS, GRACE_MIN } from "../lib/config.js";
 import { promoteNextInWaitlist } from "../lib/waitlist.js";
 import { cancelAndRefund } from "../lib/reservation.js";
+import { logInfo } from "../lib/log.js";
 
 const router = Router();
 
@@ -97,6 +98,7 @@ router.post("/", requireAuth, async (req, res) => {
     // Start the countdown to auto-cancel if they never come to scan & start.
     await scheduleReservationExpiry(result.id);
 
+    logInfo("reservation.created", { reservationId: result.id, userId: req.userId, machineId, amount: result.paidAmount });
     res.json(result);
   } catch (err) {
     if (err.message === "INSUFFICIENT_FUNDS") {
@@ -141,6 +143,7 @@ router.post("/:id/start", requireAuth, async (req, res) => {
   await cancelReservationExpiry(reservation.id);
   await scheduleCycleJobs(reservation.id, reservation.machine.cycleMinutes);
 
+  logInfo("reservation.started", { reservationId: reservation.id, machineId: reservation.machineId });
   res.json(updated);
 });
 
@@ -183,6 +186,7 @@ router.post("/:id/collect", requireAuth, async (req, res) => {
   // A machine just freed up — notify the next person waiting here.
   await promoteNextInWaitlist(reservation.machine.laundromatId);
 
+  logInfo("reservation.collected", { reservationId: reservation.id, status: finalStatus });
   res.json(updated);
 });
 

@@ -6,6 +6,7 @@ import { connection } from "./queue.js";
 import { prisma } from "./prisma.js";
 import { NOTIFY_BEFORE_MIN, GRACE_MIN, FINE_AMOUNT } from "./lib/config.js";
 import { cancelAndRefund } from "./lib/reservation.js";
+import { logInfo, logWarn } from "./lib/log.js";
 
 async function notify(userId, title, body) {
   await prisma.notification.create({ data: { userId, title, body } });
@@ -59,6 +60,7 @@ const worker = new Worker(
           "Wash complete ✅",
           `Please collect from ${machine.label} within ${GRACE_MIN} minutes to avoid a late fee.`
         );
+        logInfo("machine.done", { machineId: machine.id, reservationId });
       }
       return;
     }
@@ -92,6 +94,7 @@ const worker = new Worker(
         "Late pickup fee ⏰",
         `A ฿${(FINE_AMOUNT / 100).toFixed(2)} late fee was charged for ${fresh.machine.label}.`
       );
+      logWarn("reservation.fined", { reservationId, userId: fresh.userId, fine: FINE_AMOUNT });
       return;
     }
   },

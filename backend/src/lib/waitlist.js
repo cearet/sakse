@@ -1,4 +1,5 @@
 import { prisma } from "../prisma.js";
+import { logInfo } from "./log.js";
 
 // Called when a machine frees up. Notifies the person who has waited longest
 // at that laundromat that a machine is now available.
@@ -21,4 +22,5 @@ export async function promoteNextInWaitlist(laundromatId) {
       body: `A washing machine just freed up at ${next.laundromat.name}. Reserve it now!`,
     },
   });
+  logInfo("waitlist.promoted", { laundromatId, userId: next.userId, entryId: next.id });
 }

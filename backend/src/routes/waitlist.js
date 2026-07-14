@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { prisma } from "../prisma.js";
 import { requireAuth } from "../middleware/auth.js";
+import { logInfo } from "../lib/log.js";
 
 const router = Router();
 
@@ -54,6 +55,7 @@ router.post("/", requireAuth, async (req, res) => {
   const entry = await prisma.waitlistEntry.create({
     data: { userId: req.userId, laundromatId, position: count + 1, status: "WAITING" },
   });
+  logInfo("waitlist.joined", { userId: req.userId, laundromatId, position: count + 1 });
   res.json({ ...entry, position: count + 1 });
 });
 
@@ -63,6 +65,7 @@ router.post("/:id/leave", requireAuth, async (req, res) => {
     where: { id: req.params.id, userId: req.userId },
     data: { status: "EXPIRED" },
   });
+  logInfo("waitlist.left", { userId: req.userId, entryId: req.params.id });
   res.json({ ok: true });
 });
 

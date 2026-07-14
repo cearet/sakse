@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { prisma } from "../prisma.js";
 import { requireAuth } from "../middleware/auth.js";
+import { logInfo } from "../lib/log.js";
 
 const router = Router();
 
@@ -45,6 +46,7 @@ router.post("/topup", requireAuth, async (req, res) => {
     }),
   ]);
 
+  logInfo("wallet.topup", { userId: req.userId, amount });
   res.json({ balance: updated.balance });
 });
 
