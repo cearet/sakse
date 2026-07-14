@@ -12,12 +12,18 @@ datasource db {
 
 // ---------- Users & money ----------
 
+enum Role {
+  USER  // regular customer (default)
+  ADMIN // can access the admin panel
+}
+
 model User {
   id           String   @id @default(cuid())
   email        String   @unique
   phone        String?  @unique
   name         String
   passwordHash String
+  role         Role     @default(USER)
   createdAt    DateTime @default(now())
 
   wallet        Wallet?

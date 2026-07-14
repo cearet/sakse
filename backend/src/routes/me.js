@@ -18,6 +18,7 @@ router.get("/", requireAuth, async (req, res) => {
     email: user.email,
     name: user.name,
     phone: user.phone,
+    role: user.role,
     balance: user.wallet?.balance ?? 0,
   });
 });

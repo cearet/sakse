@@ -12,6 +12,7 @@ function publicUser(u) {
     email: u.email,
     name: u.name,
     phone: u.phone,
+    role: u.role,
     balance: u.wallet?.balance ?? 0,
   };
 }
