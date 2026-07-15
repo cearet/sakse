@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { ArrowUpCircle, WashingMachine, AlarmClock, Undo2 } from "lucide-react";
 import { api } from "../api";
 import { useAuth } from "../auth";
 import { baht, bahtNum } from "../format";
@@ -7,7 +8,7 @@ import BottomNav from "../components/BottomNav";
 
 const TOPUP_OPTIONS = [5000, 10000, 20000]; // ฿50, ฿100, ฿200
 
-const TXN_ICON = { TOPUP: "⬆️", PAYMENT: "🌀", FINE: "⏰", REFUND: "↩️" };
+const TXN_ICON = { TOPUP: ArrowUpCircle, PAYMENT: WashingMachine, FINE: AlarmClock, REFUND: Undo2 };
 
 export default function Wallet() {
   const { user } = useAuth();
@@ -51,7 +52,7 @@ export default function Wallet() {
             ))}
           </div>
           <p className="mt-3 text-xs text-slate-400">
-            🇹🇭 Opens a PromptPay QR to confirm before the balance is added.
+            Opens a PromptPay QR to confirm before the balance is added.
           </p>
         </div>
 
@@ -60,11 +61,13 @@ export default function Wallet() {
           <p className="mb-2 font-bold text-slate-800">Recent activity</p>
           <div className="space-y-2">
             {wallet?.transactions?.length ? (
-              wallet.transactions.map((t) => (
+              wallet.transactions.map((t) => {
+                const Icon = TXN_ICON[t.type];
+                return (
                 <div key={t.id} className="flex items-center justify-between rounded-2xl bg-white px-4 py-3 shadow-sm">
                   <div className="flex items-center gap-3">
-                    <span className="grid h-10 w-10 place-items-center rounded-full bg-slate-50 text-lg">
-                      {TXN_ICON[t.type] || "•"}
+                    <span className="grid h-10 w-10 place-items-center rounded-full bg-slate-50 text-slate-500">
+                      {Icon ? <Icon size={18} strokeWidth={2} /> : "•"}
                     </span>
                     <div>
                       <p className="font-semibold text-slate-800">{t.note || t.type}</p>
@@ -76,7 +79,8 @@ export default function Wallet() {
                     {baht(t.amount)}
                   </p>
                 </div>
-              ))
+                );
+              })
             ) : (
               <p className="text-sm text-slate-400">No transactions yet.</p>
             )}

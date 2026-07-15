@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { createPortal } from "react-dom";
+import { Bell } from "lucide-react";
 import { useNotifications } from "../hooks/useNotifications";
 
 // Bell button with unread badge + a slide-up sheet of notifications.
@@ -17,9 +18,9 @@ export default function NotificationBell() {
     <>
       <button
         onClick={toggle}
-        className="relative grid h-10 w-10 place-items-center rounded-full bg-white/20 text-lg active:scale-95"
+        className="relative grid h-10 w-10 place-items-center rounded-full bg-white/20 active:scale-95"
       >
-        🔔
+        <Bell size={18} strokeWidth={2.2} />
         {unread > 0 && (
           <span className="absolute -right-0.5 -top-0.5 grid h-5 min-w-5 place-items-center rounded-full bg-rose-500 px-1 text-[11px] font-bold text-white">
             {unread}

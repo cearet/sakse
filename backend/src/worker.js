@@ -32,7 +32,7 @@ const worker = new Worker(
       if (cancelled) {
         await notify(
           cancelled.userId,
-          "Reservation cancelled ⏳",
+          "Reservation cancelled",
           `You didn't scan to start ${machine.label} in time, so it was cancelled and ฿${(cancelled.paidAmount / 100).toFixed(2)} was refunded.`
         );
       }
@@ -44,7 +44,7 @@ const worker = new Worker(
       if (reservation.status === "ACTIVE" && machine.status === "RUNNING") {
         await notify(
           reservation.userId,
-          "Almost done 🧺",
+          "Almost done",
           `Your wash in ${machine.label} finishes in about ${NOTIFY_BEFORE_MIN} minutes.`
         );
       }
@@ -57,7 +57,7 @@ const worker = new Worker(
         await prisma.machine.update({ where: { id: machine.id }, data: { status: "DONE" } });
         await notify(
           reservation.userId,
-          "Wash complete ✅",
+          "Wash complete",
           `Please collect from ${machine.label} within ${GRACE_MIN} minutes to avoid a late fee.`
         );
         logInfo("machine.done", { machineId: machine.id, reservationId });
@@ -91,7 +91,7 @@ const worker = new Worker(
       ]);
       await notify(
         fresh.userId,
-        "Late pickup fee ⏰",
+        "Late pickup fee",
         `A ฿${(FINE_AMOUNT / 100).toFixed(2)} late fee was charged for ${fresh.machine.label}.`
       );
       logWarn("reservation.fined", { reservationId, userId: fresh.userId, fine: FINE_AMOUNT });

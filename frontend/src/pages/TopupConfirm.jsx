@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
+import { CheckCircle2 } from "lucide-react";
 import { api } from "../api";
 import { useAuth } from "../auth";
 import { baht } from "../format";
@@ -54,7 +55,7 @@ export default function TopupConfirm() {
       <div className="flex-1 overflow-y-auto p-4">
         {done ? (
           <div className="mt-16 text-center">
-            <div className="mx-auto mb-4 grid h-20 w-20 place-items-center rounded-full bg-emerald-100 text-5xl">✅</div>
+            <div className="mx-auto mb-4 grid h-20 w-20 place-items-center rounded-full bg-emerald-100 text-emerald-600"><CheckCircle2 size={40} strokeWidth={2} /></div>
             <p className="text-lg font-bold text-slate-800">Payment received</p>
             <p className="text-sm text-slate-500">{baht(amount)} added to your wallet</p>
           </div>

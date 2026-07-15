@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
+import { WashingMachine } from "lucide-react";
 import { api } from "../api";
 import { useAuth } from "../auth";
 import { baht } from "../format";
@@ -70,7 +71,7 @@ export default function ReserveConfirm() {
       <div className="flex-1 overflow-y-auto p-4">
         <div className="rounded-3xl border border-slate-100 bg-white p-6 shadow-sm">
           <div className="flex items-center gap-3">
-            <div className="grid h-12 w-12 place-items-center rounded-xl bg-brand-50 text-2xl">🌀</div>
+            <div className="grid h-12 w-12 place-items-center rounded-xl bg-brand-50"><WashingMachine size={22} strokeWidth={2} className="text-brand-600" /></div>
             <div>
               <p className="font-bold text-slate-800">{machine.label}</p>
               <p className="text-xs text-slate-400">{place.name}</p>

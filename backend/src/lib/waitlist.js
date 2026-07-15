@@ -18,7 +18,7 @@ export async function promoteNextInWaitlist(laundromatId) {
   await prisma.notification.create({
     data: {
       userId: next.userId,
-      title: "A machine is free 🎉",
+      title: "A machine is free",
       body: `A washing machine just freed up at ${next.laundromat.name}. Reserve it now!`,
     },
   });

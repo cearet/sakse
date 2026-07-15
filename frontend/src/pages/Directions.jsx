@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { MapContainer, TileLayer, Polyline, Marker, useMap } from "react-leaflet";
+import { Zap } from "lucide-react";
 import L from "leaflet";
 import { api } from "../api";
 import { useGeolocation } from "../hooks/useGeolocation";
@@ -10,7 +11,7 @@ import { distance } from "../format";
 const meIcon = L.divIcon({ className: "", html: `<div class="me-dot"></div>`, iconSize: [20, 20], iconAnchor: [10, 10] });
 const destIcon = L.divIcon({
   className: "",
-  html: `<div class="pin" style="background:#0284c7"><span>📍</span></div>`,
+  html: `<div class="pin" style="background:#0284c7"><span style="display:block;width:9px;height:9px;border-radius:9999px;background:#fff"></span></div>`,
   iconSize: [38, 38],
   iconAnchor: [19, 38],
 });
@@ -89,7 +90,7 @@ export default function Directions() {
                 <p className="text-2xl font-extrabold text-slate-900">{Math.max(1, Math.round(route.duration / 60))} min</p>
                 <p className="text-sm text-slate-400">{distance(route.distance)} · driving</p>
               </div>
-              <span className="rounded-full bg-brand-50 px-3 py-1 text-sm font-bold text-brand-700">🚗 Fastest</span>
+              <span className="inline-flex items-center gap-1 rounded-full bg-brand-50 px-3 py-1 text-sm font-bold text-brand-700"><Zap size={14} strokeWidth={2.2} /> Fastest</span>
             </div>
             <ol className="divide-y divide-slate-100 pb-6">
               {route.steps.map((s, i) => (

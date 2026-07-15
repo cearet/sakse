@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { WashingMachine, Hourglass, ScanLine, Lock, AlarmClock, CheckCircle2 } from "lucide-react";
 import { api } from "../api";
 import { useAuth } from "../auth";
 import { baht, machineCode } from "../format";
@@ -127,7 +128,7 @@ export default function Reservation() {
 
         {reservation === null && (
           <div className="mt-20 text-center">
-            <div className="mx-auto mb-4 grid h-20 w-20 place-items-center rounded-3xl bg-white text-5xl shadow-sm">🧺</div>
+            <div className="mx-auto mb-4 grid h-20 w-20 place-items-center rounded-3xl bg-white text-slate-300 shadow-sm"><WashingMachine size={40} strokeWidth={1.75} /></div>
             <p className="text-slate-500">No active wash right now.</p>
             <Link to="/" className="mt-5 inline-block rounded-2xl bg-brand-600 px-6 py-3 font-bold text-white shadow-lg shadow-brand-600/30">
               Find a machine
@@ -143,12 +144,13 @@ export default function Reservation() {
             {/* RESERVED — waiting to start */}
             {status === "RESERVED" && (
               <div className="mt-6">
-                <div className="mx-auto mb-5 grid h-40 w-40 place-items-center rounded-full bg-amber-50 text-6xl">🧺</div>
+                <div className="mx-auto mb-5 grid h-40 w-40 place-items-center rounded-full bg-amber-50 text-amber-500"><WashingMachine size={64} strokeWidth={1.5} /></div>
                 <p className="font-semibold text-slate-700">Reserved &amp; paid</p>
                 <p className="mt-1 text-sm text-slate-500">Load your clothes, then scan the machine's QR to start.</p>
                 {reservation.expiresAt && (
                   <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-700">
-                    <span>⏳ Auto-cancels in</span>
+                    <Hourglass size={15} strokeWidth={2.2} />
+                    <span>Auto-cancels in</span>
                     <span className="tabular-nums font-bold">
                       {fmt(new Date(reservation.expiresAt).getTime() - now)}
                     </span>
@@ -157,9 +159,9 @@ export default function Reservation() {
                 <button
                   disabled={busy}
                   onClick={() => setScan("start")}
-                  className="mt-6 w-full rounded-2xl bg-emerald-600 py-3.5 font-bold text-white shadow-lg shadow-emerald-600/30 active:scale-[0.99] disabled:opacity-60"
+                  className="mt-6 flex w-full items-center justify-center gap-2 rounded-2xl bg-emerald-600 py-3.5 font-bold text-white shadow-lg shadow-emerald-600/30 active:scale-[0.99] disabled:opacity-60"
                 >
-                  📷 Scan QR to start
+                  <ScanLine size={18} strokeWidth={2.2} /> Scan QR to start
                 </button>
                 <button
                   disabled={busy}
@@ -180,12 +182,12 @@ export default function Reservation() {
                 >
                   {overdue ? (
                     <>
-                      <span className="text-5xl">⏰</span>
+                      <AlarmClock size={44} strokeWidth={1.75} className="text-rose-500" />
                       <span className="mt-1 font-bold text-slate-700">Overdue!</span>
                     </>
                   ) : finished ? (
                     <>
-                      <span className="text-3xl">✅</span>
+                      <CheckCircle2 size={30} strokeWidth={2} className="text-amber-500" />
                       <span className="mt-0.5 text-xs font-semibold text-slate-400">collect within</span>
                       <span className="text-4xl font-extrabold tabular-nums text-amber-600">{fmt(graceLeft)}</span>
                       <span className="text-xs text-slate-400">or a late fee applies</span>
@@ -208,13 +210,13 @@ export default function Reservation() {
                   <button
                     disabled={busy}
                     onClick={() => setScan("collect")}
-                    className="mt-6 w-full rounded-2xl bg-brand-600 py-3.5 font-bold text-white shadow-lg shadow-brand-600/30 active:scale-[0.99] disabled:opacity-60"
+                    className="mt-6 flex w-full items-center justify-center gap-2 rounded-2xl bg-brand-600 py-3.5 font-bold text-white shadow-lg shadow-brand-600/30 active:scale-[0.99] disabled:opacity-60"
                   >
-                    📷 Scan QR to collect
+                    <ScanLine size={18} strokeWidth={2.2} /> Scan QR to collect
                   </button>
                 ) : (
-                  <div className="mt-6 w-full rounded-2xl bg-slate-100 py-3.5 text-center font-semibold text-slate-400">
-                    🔒 Collect unlocks when the timer ends
+                  <div className="mt-6 flex w-full items-center justify-center gap-2 rounded-2xl bg-slate-100 py-3.5 font-semibold text-slate-400">
+                    <Lock size={16} strokeWidth={2.2} /> Collect unlocks when the timer ends
                   </div>
                 )}
               </div>

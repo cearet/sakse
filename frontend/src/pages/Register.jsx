@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { WashingMachine } from "lucide-react";
 import { useAuth } from "../auth";
 
 export default function Register() {
@@ -31,7 +32,7 @@ export default function Register() {
   return (
     <div className="flex h-full flex-col">
       <div className="bg-gradient-to-br from-brand-500 to-brand-600 px-7 pb-12 pt-16 text-white">
-        <div className="mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-white/20 text-3xl">✨</div>
+        <div className="mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-white/20 text-white"><WashingMachine size={28} strokeWidth={2} /></div>
         <h1 className="text-3xl font-extrabold tracking-tight">Create account</h1>
         <p className="mt-1 text-brand-100">It only takes a moment.</p>
       </div>

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
+import { Navigation, WashingMachine, QrCode, Sparkles } from "lucide-react";
 import { api } from "../api";
 import { baht, distance, etaMinutes } from "../format";
 import { useGeolocation } from "../hooks/useGeolocation";
@@ -84,7 +85,7 @@ export default function Laundromat() {
           to={`/route/${place.id}`}
           className="mt-3 inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-sm font-bold text-brand-700 shadow active:scale-95"
         >
-          🧭 Get directions
+          <Navigation size={15} strokeWidth={2.2} /> Get directions
         </Link>
       </header>
 
@@ -102,8 +103,9 @@ export default function Laundromat() {
 
         {/* A machine freed up for this waitlisted user */}
         {wait?.status === "NOTIFIED" && (
-          <div className="rounded-2xl bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800">
-            🎉 A machine is free — grab one below before someone else does!
+          <div className="flex items-center gap-2 rounded-2xl bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800">
+            <Sparkles size={16} strokeWidth={2.2} className="shrink-0" />
+            A machine is free — grab one below before someone else does!
           </div>
         )}
 
@@ -139,16 +141,16 @@ export default function Laundromat() {
               className="flex items-center justify-between rounded-2xl border border-slate-100 bg-white p-4 shadow-sm"
             >
               <div className="flex items-center gap-3">
-                <div className={`grid h-12 w-12 place-items-center rounded-xl text-2xl ${free ? "bg-brand-50" : "bg-slate-50"}`}>
-                  🌀
+                <div className={`grid h-12 w-12 place-items-center rounded-xl ${free ? "bg-brand-50" : "bg-slate-50"}`}>
+                  <WashingMachine size={22} strokeWidth={2} className={free ? "text-brand-600" : "text-slate-400"} />
                 </div>
                 <div>
                   <p className="font-bold text-slate-800">{m.label}</p>
                   <p className="text-xs text-slate-400">
                     {baht(m.pricePerCycle)} · {m.cycleMinutes} min
                   </p>
-                  <Link to={`/machine/${m.id}/qr`} className="text-xs font-semibold text-brand-600">
-                    ▦ Machine QR
+                  <Link to={`/machine/${m.id}/qr`} className="inline-flex items-center gap-1 text-xs font-semibold text-brand-600">
+                    <QrCode size={13} strokeWidth={2.2} /> Machine QR
                   </Link>
                 </div>
               </div>
