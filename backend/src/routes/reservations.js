@@ -11,7 +11,7 @@ const router = Router();
 
 // A machine's QR sticker encodes this payload. Scanning it (to start or to
 // collect) proves the user is physically at the right machine.
-export function machineCode(machineId) {
+function machineCode(machineId) {
   return `SAKSE-MACHINE:${machineId}`;
 }
 // Accept either the full payload or the bare id, and ignore surrounding space.

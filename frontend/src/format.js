@@ -1,7 +1,3 @@
-// Money is stored/handled in satang everywhere (฿1 = 100 satang).
-
-// Just the numeric part, e.g. "250.00". Use with a separate ฿ element so the
-// glyph never collides with the digits.
 export function bahtNum(satang) {
   return ((satang ?? 0) / 100).toFixed(2);
 }
@@ -23,11 +19,6 @@ export function distance(meters) {
 export function etaMinutes(meters) {
   if (meters == null) return null;
   return Math.max(1, Math.round((meters * 1.3) / 400));
-}
-
-// A maps deep-link for turn-by-turn navigation to a lat/lng.
-export function directionsUrl(lat, lng) {
-  return `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
 }
 
 // The payload printed on a machine's QR sticker. Must match the backend's

@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import L from "leaflet";
 import { api } from "../api";
 import { useAuth } from "../auth";
-import { baht, bahtNum, distance, etaMinutes } from "../format";
+import { bahtNum, distance, etaMinutes } from "../format";
 import { useGeolocation } from "../hooks/useGeolocation";
 import BottomNav from "../components/BottomNav";
 import NotificationBell from "../components/NotificationBell";
