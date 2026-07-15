@@ -8,7 +8,7 @@ const STATUS = {
   AVAILABLE: { label: "Free", cls: "bg-emerald-100 text-emerald-700" },
   RESERVED: { label: "Reserved", cls: "bg-amber-100 text-amber-700" },
   RUNNING: { label: "Running", cls: "bg-brand-100 text-brand-700" },
-  DONE: { label: "Done", cls: "bg-violet-100 text-violet-700" },
+  DONE: { label: "Done", cls: "bg-sky-100 text-sky-700" },
   OVERDUE: { label: "Overdue", cls: "bg-rose-100 text-rose-700" },
   OUT_OF_ORDER: { label: "Out of order", cls: "bg-slate-200 text-slate-500" },
 };
@@ -64,7 +64,7 @@ export default function Laundromat() {
   return (
     <div className="flex h-full flex-col">
       {/* Header */}
-      <header className="rounded-b-3xl bg-gradient-to-br from-brand-500 to-violet-600 px-5 pb-8 pt-6 text-white">
+      <header className="rounded-b-3xl bg-gradient-to-br from-brand-500 to-brand-600 px-5 pb-8 pt-6 text-white">
         <Link to="/" className="mb-3 inline-flex items-center gap-1 text-sm text-white/80">
           ‹ Back to map
         </Link>

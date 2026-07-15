@@ -117,7 +117,7 @@ export default function Reservation() {
 
   return (
     <div className="flex h-full flex-col bg-slate-50">
-      <header className="flex items-center justify-between rounded-b-3xl bg-gradient-to-br from-brand-500 to-violet-600 px-5 pb-8 pt-6 text-white">
+      <header className="flex items-center justify-between rounded-b-3xl bg-gradient-to-br from-brand-500 to-brand-600 px-5 pb-8 pt-6 text-white">
         <h1 className="text-2xl font-extrabold">My Wash</h1>
         <NotificationBell />
       </header>
@@ -176,7 +176,7 @@ export default function Reservation() {
               <div className="mt-6">
                 <Ring
                   progress={overdue ? 1 : finished ? graceProgress : progress}
-                  color={overdue ? "#e11d48" : finished ? "#f59e0b" : "#4f46e5"}
+                  color={overdue ? "#e11d48" : finished ? "#f59e0b" : "#0284c7"}
                 >
                   {overdue ? (
                     <>

@@ -26,7 +26,7 @@ export default function Wallet() {
 
   return (
     <div className="flex h-full flex-col bg-slate-50">
-      <header className="rounded-b-3xl bg-gradient-to-br from-brand-500 to-violet-600 px-5 pb-8 pt-6 text-white">
+      <header className="rounded-b-3xl bg-gradient-to-br from-brand-500 to-brand-600 px-5 pb-8 pt-6 text-white">
         <h1 className="text-2xl font-extrabold">Wallet</h1>
         <p className="mt-6 text-sm text-brand-100">Balance</p>
         <p className="text-4xl font-extrabold">

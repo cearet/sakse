@@ -10,7 +10,7 @@ import { distance } from "../format";
 const meIcon = L.divIcon({ className: "", html: `<div class="me-dot"></div>`, iconSize: [20, 20], iconAnchor: [10, 10] });
 const destIcon = L.divIcon({
   className: "",
-  html: `<div class="pin" style="background:#4f46e5"><span>📍</span></div>`,
+  html: `<div class="pin" style="background:#0284c7"><span>📍</span></div>`,
   iconSize: [38, 38],
   iconAnchor: [19, 38],
 });
@@ -69,7 +69,7 @@ export default function Directions() {
           <Marker position={[place.lat, place.lng]} icon={destIcon} />
           {route && (
             <>
-              <Polyline positions={route.coordinates} pathOptions={{ color: "#4f46e5", weight: 5, opacity: 0.85 }} />
+              <Polyline positions={route.coordinates} pathOptions={{ color: "#0284c7", weight: 5, opacity: 0.85 }} />
               <FitRoute coordinates={route.coordinates} />
             </>
           )}

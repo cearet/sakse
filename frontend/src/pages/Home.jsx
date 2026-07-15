@@ -10,7 +10,7 @@ import BottomNav from "../components/BottomNav";
 import NotificationBell from "../components/NotificationBell";
 
 function pinIcon(available) {
-  const color = available > 0 ? "#4f46e5" : "#94a3b8";
+  const color = available > 0 ? "#0284c7" : "#94a3b8";
   return L.divIcon({
     className: "",
     html: `<div class="pin" style="background:${color}"><span>${available}</span></div>`,
