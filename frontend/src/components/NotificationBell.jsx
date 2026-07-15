@@ -3,6 +3,15 @@ import { createPortal } from "react-dom";
 import { Bell } from "lucide-react";
 import { useNotifications } from "../hooks/useNotifications";
 
+// Colour-code each notification by kind:
+//  red = a charge/penalty, orange = a heads-up, green = good news (default).
+function dotColor(title) {
+  const t = (title || "").toLowerCase();
+  if (t.includes("fee") || t.includes("late")) return "bg-rose-500";
+  if (t.includes("almost") || t.includes("cancel")) return "bg-amber-500";
+  return "bg-emerald-500";
+}
+
 // Bell button with unread badge + a slide-up sheet of notifications.
 export default function NotificationBell() {
   const { items, unread, markAllRead } = useNotifications();
@@ -46,10 +55,13 @@ export default function NotificationBell() {
               ) : (
                 <div className="space-y-2 pb-4">
                   {items.map((n) => (
-                    <div key={n.id} className="rounded-2xl bg-slate-50 p-4">
-                      <p className="font-semibold text-slate-800">{n.title}</p>
-                      <p className="text-sm text-slate-500">{n.body}</p>
-                      <p className="mt-1 text-xs text-slate-400">{new Date(n.createdAt).toLocaleTimeString()}</p>
+                    <div key={n.id} className="flex gap-3 rounded-2xl bg-slate-50 p-4">
+                      <span className={`mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full ${dotColor(n.title)}`} />
+                      <div className="min-w-0">
+                        <p className="font-semibold text-slate-800">{n.title}</p>
+                        <p className="text-sm text-slate-500">{n.body}</p>
+                        <p className="mt-1 text-xs text-slate-400">{new Date(n.createdAt).toLocaleTimeString()}</p>
+                      </div>
                     </div>
                   ))}
                 </div>
